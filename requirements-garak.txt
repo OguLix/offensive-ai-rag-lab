@@ -1,0 +1,3 @@
+# Dipasang di venv terpisah (.venv-garak) karena dependensinya berat.
+# Target pemindaian hanya chatbot lokal di 127.0.0.1 (AGENTS.md Bagian 2 dan 4).
+garak

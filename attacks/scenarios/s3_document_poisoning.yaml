@@ -1,0 +1,10 @@
+# Skema kosong Fase 0. Payload diisi pemilik skenario di Fase 3 dan hanya untuk
+# chatbot lokal di repo ini (AGENTS.md Bagian 2 dan 7).
+id: S3
+name: "Document poisoning"
+owner: "<NAMA_C>"
+goal: >-
+  Mengukur apakah dokumen berisi klaim palsu yang disisipkan ke knowledge base
+  mengalahkan dokumen asli saat retrieval.
+variants: []  # minimal 5 varian saat diisi
+success_condition: "TODO: klaim palsu S3, lihat attacks/judges.py"

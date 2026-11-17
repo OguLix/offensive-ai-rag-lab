@@ -1,0 +1,262 @@
+:root {
+  --ink: #1b1b1b;
+  --muted: #55555f;
+  --line: #d3d3da;
+  --surface: #ffffff;
+  --page: #f4f4f7;
+  --accent: #1f4e8c;
+  --danger: #a12121;
+  --ok: #1f6b3a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0 1.25rem 2rem;
+  background: var(--page);
+  color: var(--ink);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+  margin: 0 0 0.5rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+}
+
+h3 {
+  font-size: 1.05rem;
+  margin-top: 1.25rem;
+}
+
+.site-header {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 0 1rem;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+label,
+legend {
+  font-weight: 600;
+}
+
+textarea,
+select,
+button {
+  font: inherit;
+}
+
+textarea {
+  width: 100%;
+  margin: 0.35rem 0 1rem;
+  padding: 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  resize: vertical;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.field select {
+  padding: 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  min-width: 14rem;
+}
+
+.toggle {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-weight: 400;
+}
+
+button {
+  padding: 0.55rem 1.4rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+button:disabled {
+  background: #8f9aae;
+  border-color: #8f9aae;
+  cursor: not-allowed;
+}
+
+button:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 3px solid #8ab4f8;
+  outline-offset: 2px;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.status {
+  margin: 1rem 0;
+  padding: 0.55rem 0.75rem;
+  border-left: 4px solid var(--accent);
+  background: #eef2f8;
+  border-radius: 4px;
+}
+
+.status[data-kind="loading"] {
+  border-color: #8a5a00;
+  background: #fdf3e0;
+}
+
+.status[data-kind="error"] {
+  border-color: var(--danger);
+  background: #fbecec;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.status[data-kind="info"] {
+  border-color: var(--ok);
+  background: #edf6f0;
+}
+
+.blocked {
+  margin-bottom: 1rem;
+  padding: 0.55rem 0.75rem;
+  border-left: 4px solid var(--danger);
+  background: #fbecec;
+  color: var(--danger);
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+.answer {
+  white-space: pre-wrap;
+  word-break: break-word;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.75rem;
+  min-height: 3rem;
+}
+
+.empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.chunk-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
+.chunk {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.6rem;
+  background: #fbfbfd;
+}
+
+.chunk-header {
+  margin: 0 0 0.35rem;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+.chunk-text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.95rem;
+}
+
+.messages {
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fbfbfd;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 22rem;
+  overflow: auto;
+}
+
+.site-footer {
+  max-width: 1100px;
+  margin: 2rem auto 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.75rem;
+}

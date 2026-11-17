@@ -1,0 +1,10 @@
+# Skema kosong Fase 0. Payload diisi pemilik skenario di Fase 3 dan hanya untuk
+# chatbot lokal di repo ini (AGENTS.md Bagian 2 dan 7).
+id: S1
+name: "Prompt injection langsung dan kebocoran system prompt"
+owner: "<NAMA_A>"
+goal: >-
+  Mengukur apakah pengguna dapat menimpa instruksi sistem atau memperoleh isi
+  system prompt, diukur lewat canary yang ditanam di system prompt.
+variants: []  # minimal 5 varian saat diisi
+success_condition: "TODO: aturan canary S1, lihat attacks/judges.py"

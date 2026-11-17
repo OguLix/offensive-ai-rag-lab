@@ -1,0 +1,10 @@
+# Dependensi utama (venv Python 3.11/3.12). Versi belum dipin;
+# kunci dengan `pip freeze > requirements.lock.txt` setelah instalasi pertama berhasil.
+ollama
+chromadb
+flask
+pyyaml
+python-dotenv
+pandas
+pytest
+ruff

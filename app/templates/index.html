@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Chat — RAG Red Team Lab{% endblock %}
+
+{% block content %}
+<section class="panel chat-panel" aria-labelledby="chat-heading">
+  <h2 id="chat-heading">Chat</h2>
+
+  <form id="chat-form" novalidate>
+    <label for="question">Pertanyaan</label>
+    <textarea id="question" name="question" rows="3" required></textarea>
+
+    <div class="controls">
+      <div class="field">
+        <label for="collection">Koleksi</label>
+        <select id="collection" name="collection"></select>
+      </div>
+
+      <fieldset id="mitigations" class="field">
+        <legend>Mitigasi</legend>
+        <p class="hint">Daftar toggle dimuat dari /api/options.</p>
+      </fieldset>
+
+      <button id="send" type="submit" disabled>Kirim</button>
+    </div>
+  </form>
+
+  <p id="status" class="status" role="status" aria-live="polite">Memuat opsi...</p>
+
+  <div id="blocked" class="blocked" hidden></div>
+
+  <h3>Jawaban</h3>
+  <div id="answer" class="answer empty">Belum ada jawaban.</div>
+</section>
+
+<section class="panel inspector" aria-labelledby="inspector-heading">
+  <h2 id="inspector-heading">Panel inspeksi</h2>
+
+  <h3>Potongan dokumen</h3>
+  <ul id="chunks" class="chunk-list">
+    <li class="empty">Belum ada chunk.</li>
+  </ul>
+
+  <h3>Prompt akhir</h3>
+  <pre id="messages" class="messages empty">Belum ada prompt.</pre>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}

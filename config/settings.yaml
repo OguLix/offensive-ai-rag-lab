@@ -1,0 +1,31 @@
+# Satu-satunya sumber konfigurasi runtime (AGENTS.md Bagian 4 dan 11).
+# Nama model sengaja dibiarkan placeholder: tim memilih model di Fase 0/1,
+# dan kode harus gagal jelas alih-alih diam-diam memakai model yang salah.
+
+# LLM lokal lewat Ollama (kelas 3B-8B terkuantisasi). Isi setelah model dipilih.
+chat_model: "TODO_ISI_DI_FASE_0"
+embedding_model: "TODO_ISI_DI_FASE_0"
+
+# Generasi: temperature 0 dan seed tetap supaya percobaan bisa diulang.
+temperature: 0.0
+seed: 0
+
+# Retrieval: jumlah chunk yang diambil per pertanyaan.
+retrieval_k: 4
+
+# Path relatif terhadap root repo.
+chroma_db_path: "chroma_db"
+logs_path: "logs"
+
+# Koleksi vektor. kb_clean tidak pernah ditimpa (AGENTS.md Bagian 6);
+# daftar ini juga menjadi whitelist di app/routes.py.
+default_collection: "kb_clean"
+allowed_collections:
+  - "kb_clean"
+  - "kb_poisoned"
+  - "kb_poisoned_sanitized"
+
+# Aplikasi Flask hanya untuk loopback. Jangan diganti ke 0.0.0.0 (Bagian 10.3).
+app_host: "127.0.0.1"
+app_port: 5000
+max_question_chars: 2000

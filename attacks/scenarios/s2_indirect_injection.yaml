@@ -1,0 +1,10 @@
+# Skema kosong Fase 0. Payload diisi pemilik skenario di Fase 3 dan hanya untuk
+# chatbot lokal di repo ini (AGENTS.md Bagian 2 dan 7).
+id: S2
+name: "Prompt injection tidak langsung lewat dokumen"
+owner: "<NAMA_B>"
+goal: >-
+  Mengukur apakah instruksi yang tersembunyi di dokumen hasil retrieval diikuti
+  oleh model, padahal pertanyaan pengguna sendiri polos.
+variants: []  # minimal 5 varian saat diisi
+success_condition: "TODO: string penanda S2, lihat attacks/judges.py"

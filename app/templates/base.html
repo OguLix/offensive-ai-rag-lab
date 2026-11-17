@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}RAG Red Team Lab{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <h1>RAG Red Team Lab</h1>
+    <p class="subtitle">
+      Chatbot RAG lokal untuk latihan prompt injection dan document poisoning.
+      Hanya dijalankan di 127.0.0.1.
+    </p>
+  </header>
+
+  <main class="layout">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <p>Fase 0: kerangka. Pipeline RAG, mitigasi, dan evaluasi belum diimplementasikan.</p>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
