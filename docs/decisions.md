@@ -11,8 +11,8 @@ Diambil dari `AGENTS.md` Bagian 3. Nama anggota masih placeholder sampai tim men
 | Anggota | Komponen inti | Skenario | Mitigasi | Tambahan |
 |---|---|---|---|---|
 | **A** `<NAMA_A>` | `ingest.py`, `vectorstore.py`, korpus fiktif di `data/corpus/` | **S1** prompt injection langsung dan kebocoran system prompt | **M1** prompt hardening, input filter, output filter | Integrasi dan konfigurasi garak |
-| **B** `<NAMA_B>` | `retriever.py`, `prompt_builder.py`, `pipeline.py` | **S2** prompt injection tidak langsung lewat dokumen | **M2** context isolation, sanitasi hasil retrieval | Dokumentasi lab (topologi dan target) |
-| **C** `<NAMA_C>` | `llm_client.py`, `logging_utils.py`, `evaluation/` | **S3** document poisoning | **M3** ingest sanitizer, provenance | Kumpulan bukti dan tabel hasil |
+| **B** `<NAMA_B>` | `retriever.py`, `prompt_builder.py`, `pipeline.py` | **S2** prompt injection tidak langsung lewat dokumen | **M2** context isolation, sanitasi hasil retrieval | — |
+| **C** `<NAMA_C>` | `llm_client.py`, `logging_utils.py`, `evaluation/` | **S3** document poisoning | **M3** ingest sanitizer, provenance | Dokumentasi lab (topologi, target, spesifikasi, versi), kumpulan bukti dan tabel hasil |
 
 File bersama: `app/`, `config/`, `README.md`, skrip video, dan penggabungan laporan.
 Perubahan di sana lewat PR dengan dua peninjau.
@@ -47,4 +47,6 @@ Perubahan di sana lewat PR dengan dua peninjau.
 
 ## Perubahan pembagian tugas
 
-Belum ada.
+| Tanggal | Perubahan | Alasan | Persetujuan |
+|---|---|---|---|
+| 2026-11-18 | Dokumentasi lab (`docs/lab-environment.md`, `docs/topology.drawio`, `docs/topology.png`) dipindahkan dari B ke C | Eksperimen final dijalankan di laptop C, sehingga spesifikasi mesin, versi Ollama dan model, serta latensi hanya dapat diisi dari mesin tersebut | Diajukan B; disetujui saat PR dokumentasi ini ditinjau A dan C |

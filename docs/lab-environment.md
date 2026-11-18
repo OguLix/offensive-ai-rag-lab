@@ -1,11 +1,11 @@
 # Lingkungan lab
 
-Pemilik: B. Isi dokumen ini dari mesin yang benar-benar dipakai untuk eksperimen
+Pemilik: C. Isi dokumen ini dari mesin yang benar-benar dipakai untuk eksperimen
 final. Jangan mengisi angka perkiraan.
 
 ## 1. Topologi
 
-TODO(B): gambar topologi di `docs/topology.drawio`, ekspor ke `docs/topology.png`,
+TODO(C): gambar topologi di `docs/topology.drawio`, ekspor ke `docs/topology.png`,
 lalu jelaskan komponen dan arah koneksinya di sini.
 
 Poin yang harus terlihat:
@@ -49,5 +49,5 @@ Poin yang harus terlihat:
 
 ## 5. Catatan waktu
 
-TODO(B): catat perkiraan latensi satu permintaan dan total waktu satu run penuh,
+TODO(C): catat perkiraan latensi satu permintaan dan total waktu satu run penuh,
 supaya anggaran waktu eksperimen di laporan bisa dipertanggungjawabkan.
