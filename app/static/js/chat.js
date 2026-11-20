@@ -70,7 +70,7 @@ async function loadOptions() {
     state.options = data;
     renderOptions(data);
     setStatus(
-      "Siap. Model: " + data.chat_model + ". Pipeline masih stub Fase 0, jadi permintaan akan dijawab 501.",
+      "Siap. Model: " + data.chat_model + ". Chatbot RAG lokal; koleksi dan toggle mitigasi siap dipakai.",
       "info",
     );
   } catch (error) {
