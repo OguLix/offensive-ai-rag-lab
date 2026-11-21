@@ -47,7 +47,8 @@ const MITIGATION_GROUPS = [
   },
   {
     id: "M3",
-    label: "M3 Asal dokumen",
+    label: "M3 Asal dokumen (saat ingest)",
+    note: "M3 berjalan saat ingest. Untuk melihat efeknya, bandingkan koleksi kb_poisoned dan kb_poisoned_sanitized di menu Method.",
     flags: ["ingest_sanitizer", "provenance_check"],
   },
 ];
@@ -228,6 +229,13 @@ function renderMitigations(flags) {
     heading.className = "mitigation-group-label";
     heading.textContent = group.label;
     section.append(heading);
+
+    if (group.note) {
+      const note = document.createElement("p");
+      note.className = "mitigation-group-note";
+      note.textContent = group.note;
+      section.append(note);
+    }
 
     for (const flag of groupFlags) {
       rendered.add(flag);
