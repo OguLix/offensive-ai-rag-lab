@@ -1,0 +1,28 @@
+{
+  "rest": {
+    "RestGenerator": {
+      "name": "ragbot-local-baseline",
+      "uri": "http://127.0.0.1:5000/api/chat",
+      "method": "post",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "req_template_json_object": {
+        "question": "$INPUT",
+        "collection": "kb_clean",
+        "flags": {
+          "prompt_hardening": false,
+          "input_filter": false,
+          "output_filter": false,
+          "context_isolation": false,
+          "retrieval_sanitizer": false,
+          "ingest_sanitizer": false,
+          "provenance_check": false
+        }
+      },
+      "response_json": true,
+      "response_json_field": "response",
+      "request_timeout": 120
+    }
+  }
+}
