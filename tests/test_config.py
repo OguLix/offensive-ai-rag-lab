@@ -7,12 +7,13 @@ from pathlib import Path
 from ragbot.config import load_settings, load_system_prompt
 
 
-def test_settings_load_with_placeholder_models() -> None:
+def test_settings_load_with_team_models() -> None:
     settings = load_settings()
 
-    # Model sengaja belum dipilih; test ini memastikan kode tidak menebak nama model.
-    assert settings.chat_model == "TODO_ISI_DI_FASE_0"
-    assert settings.embedding_model == "TODO_ISI_DI_FASE_0"
+    # Nama model disepakati tim di docs/decisions.md; test ini menjaga agar
+    # tidak diganti diam-diam.
+    assert settings.chat_model == "llama3.2:3b"
+    assert settings.embedding_model == "nomic-embed-text"
     assert settings.retrieval_k > 0
     assert isinstance(settings.chroma_db_path, Path)
     assert settings.chroma_db_path.is_absolute()

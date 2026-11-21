@@ -1,10 +1,10 @@
 # Satu-satunya sumber konfigurasi runtime (AGENTS.md Bagian 4 dan 11).
-# Nama model sengaja dibiarkan placeholder: tim memilih model di Fase 0/1,
-# dan kode harus gagal jelas alih-alih diam-diam memakai model yang salah.
+# Kode tidak boleh menyimpan nama model sendiri; ganti model hanya di sini.
 
-# LLM lokal lewat Ollama (kelas 3B-8B terkuantisasi). Isi setelah model dipilih.
-chat_model: "TODO_ISI_DI_FASE_0"
-embedding_model: "TODO_ISI_DI_FASE_0"
+# LLM lokal lewat Ollama (kelas 3B-8B terkuantisasi), disepakati tim
+# (docs/decisions.md). Siapkan dengan `ollama pull` untuk kedua model.
+chat_model: "llama3.2:3b"
+embedding_model: "nomic-embed-text"
 
 # Generasi: temperature 0 dan seed tetap supaya percobaan bisa diulang.
 temperature: 0.0

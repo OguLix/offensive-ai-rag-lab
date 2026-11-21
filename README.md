@@ -23,7 +23,7 @@ Fase 0: kerangka repo saja. Semua modul RAG, mitigasi, dan evaluasi masih
 
 - Python 3.11 atau 3.12 (venv). Jangan 3.14.
 - Ollama terpasang, dengan model chat dan embedding yang dipilih tim.
-- Nama model diisi di `config/settings.yaml` (sekarang `TODO_ISI_DI_FASE_0`).
+- Nama model di `config/settings.yaml`: chat `llama3.2:3b`, embedding `nomic-embed-text`.
 
 ## Setup Windows (PowerShell)
 

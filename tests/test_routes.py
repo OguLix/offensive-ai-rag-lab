@@ -87,8 +87,27 @@ def test_chat_returns_serialised_result_when_pipeline_is_mocked(
     assert captured["flags"] == MitigationFlags(input_filter=True)
 
 
-def test_chat_returns_501_while_pipeline_is_still_a_stub(client: FlaskClient) -> None:
+def test_chat_returns_501_when_pipeline_raises_not_implemented(
+    client: FlaskClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def stub_answer(*_: object) -> PipelineResult:
+        raise NotImplementedError
+
+    monkeypatch.setattr(pipeline, "answer", stub_answer)
     response = client.post("/api/chat", json={"question": "Halo"})
 
     assert response.status_code == 501
     assert "Fase 0" in response.get_json()["error"]
+
+
+def test_chat_returns_503_when_ollama_is_unreachable(
+    client: FlaskClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def unreachable_answer(*_: object) -> PipelineResult:
+        raise ConnectionError("Failed to connect to Ollama")
+
+    monkeypatch.setattr(pipeline, "answer", unreachable_answer)
+    response = client.post("/api/chat", json={"question": "Halo"})
+
+    assert response.status_code == 503
+    assert "Ollama" in response.get_json()["error"]
