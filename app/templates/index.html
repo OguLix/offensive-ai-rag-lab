@@ -1,49 +1,142 @@
 {% extends "base.html" %}
 
-{% block title %}Chat — RAG Red Team Lab{% endblock %}
+{% block title %}RAG Red Team Lab — Hasil{% endblock %}
 
 {% block content %}
-<section class="panel chat-panel" aria-labelledby="chat-heading">
-  <h2 id="chat-heading">Chat</h2>
+<aside class="history" aria-labelledby="history-heading">
+  <h2 id="history-heading">Riwayat Chat</h2>
+  <ul id="history-list" class="history-list">
+    <li class="history-empty">Belum ada riwayat.</li>
+  </ul>
+  <button id="disable-mitigations" class="button-outline" type="button">
+    Matikan semua mitigasi
+  </button>
+</aside>
 
-  <form id="chat-form" novalidate>
-    <label for="question">Pertanyaan</label>
-    <textarea id="question" name="question" rows="3" required></textarea>
+<section class="conversation" aria-labelledby="conversation-heading">
+  <header class="conversation-head">
+    <h2 id="conversation-heading">Percakapan baru</h2>
+  </header>
 
-    <div class="controls">
-      <div class="field">
-        <label for="collection">Koleksi</label>
-        <select id="collection" name="collection"></select>
-      </div>
+  <div id="thread" class="thread">
+    <article id="question-bubble" class="bubble-user" hidden>
+      <p id="question-text"></p>
+    </article>
 
-      <fieldset id="mitigations" class="field">
-        <legend>Mitigasi</legend>
-        <p class="hint">Daftar toggle dimuat dari /api/options.</p>
+    <p class="assistant-label">Angga AI</p>
+
+    {% include "partials/answer_panel.html" %}
+  </div>
+
+  <div class="chat-controls">
+    <div class="dock">
+      <fieldset id="mitigation-panel" class="mitigation-panel" hidden>
+        <legend class="sr-only">Mitigasi</legend>
       </fieldset>
 
-      <button id="send" type="submit" disabled>Kirim</button>
+      <button
+        class="dock-row"
+        id="attack-menu"
+        type="button"
+        disabled
+        title="TODO: belum ada endpoint skenario"
+      >
+        <span>Jenis Serangan</span>
+        <span class="todo-tag">TODO</span>
+      </button>
+
+      <button
+        class="dock-row"
+        id="mitigation-menu"
+        type="button"
+        aria-expanded="false"
+        aria-controls="mitigation-panel"
+      >
+        <span>Jenis Mitigasi</span>
+        <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+
+      <button
+        class="dock-row"
+        id="method-menu"
+        type="button"
+        disabled
+        title="TODO: belum ada padanan backend"
+      >
+        <span>Method</span>
+        <span class="dock-trailing">
+          <span class="todo-tag">TODO</span>
+          <span class="plus" aria-hidden="true">+</span>
+        </span>
+      </button>
     </div>
+
+    <fieldset id="collections" class="collection-card">
+      <legend class="sr-only">Koleksi</legend>
+    </fieldset>
+  </div>
+
+  <form id="chat-form" class="composer" novalidate>
+    <label class="sr-only" for="question">Pertanyaan</label>
+    <input
+      id="question"
+      name="question"
+      type="text"
+      autocomplete="off"
+      placeholder="Tulis pertanyaan..."
+      required
+    >
+    <button id="send" class="send" type="submit" aria-label="Kirim" disabled>
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"></path>
+      </svg>
+    </button>
   </form>
-
-  <p id="status" class="status" role="status" aria-live="polite">Memuat opsi...</p>
-
-  <div id="blocked" class="blocked" hidden></div>
-
-  <h3>Jawaban</h3>
-  <div id="answer" class="answer empty">Belum ada jawaban.</div>
 </section>
 
-<section class="panel inspector" aria-labelledby="inspector-heading">
-  <h2 id="inspector-heading">Panel inspeksi</h2>
+<aside class="evidence" aria-labelledby="evidence-heading">
+  <h2 id="evidence-heading">
+    <span id="chunk-count" class="evidence-count">「0」</span>
+    Bukti pengamatan
+  </h2>
 
-  <h3>Potongan dokumen</h3>
-  <ul id="chunks" class="chunk-list">
+  <div class="tabs" role="tablist" aria-label="Bukti pengamatan">
+    <button
+      id="tab-chunks"
+      class="tab is-active"
+      type="button"
+      role="tab"
+      aria-selected="true"
+      aria-controls="chunks"
+    >
+      Chunk terambil
+    </button>
+    <button
+      id="tab-prompt"
+      class="tab"
+      type="button"
+      role="tab"
+      aria-selected="false"
+      aria-controls="messages"
+    >
+      Prompt akhir
+    </button>
+  </div>
+
+  <ul id="chunks" class="chunk-list" role="tabpanel" aria-labelledby="tab-chunks">
     <li class="empty">Belum ada chunk.</li>
   </ul>
 
-  <h3>Prompt akhir</h3>
-  <pre id="messages" class="messages empty">Belum ada prompt.</pre>
-</section>
+  <pre
+    id="messages"
+    class="messages empty"
+    role="tabpanel"
+    aria-labelledby="tab-prompt"
+    hidden
+  >Belum ada prompt.</pre>
+</aside>
 {% endblock %}
 
 {% block scripts %}
