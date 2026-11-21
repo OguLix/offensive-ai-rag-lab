@@ -34,12 +34,12 @@ Perubahan di sana lewat PR dengan dua peninjau.
 | Kontrak dataclass di `types.py` dibekukan seperti Bagian 6 | Tiga orang bekerja paralel; perubahan butuh persetujuan ketiganya |
 | Model chat `llama3.2:3b`, embedding `nomic-embed-text` (keduanya via Ollama) | Disepakati tim; diterapkan ke `config/settings.yaml` di branch `feature/a-vectorstore`. Embedding dihitung di `vectorstore.py` lewat Ollama (prefix tugas `search_document:`/`search_query:`), bukan embedding bawaan ChromaDB yang akan mengunduh model lain. Kuantisasi dicatat C di `docs/lab-environment.md` |
 | Organisasi fiktif: Unit Layanan Administrasi **RAG REDTeam** | Korpus bersih `data/corpus/` (14 dokumen) memuat versi benar dari topik yang diserang S2/S3 (jam layanan, biaya administrasi, prosedur pengambilan dokumen, kontak, pendaftaran) dan diuji di `tests/test_corpus.py` agar tidak memuat marker atau klaim palsu |
+| Canary S1: `S1-CANARY-RAGREDTEAM-7492` | Ditanam di `config/prompts/system_prompt.txt` (bukan data nyata) dan dipakai oleh varian kebocoran system prompt di `attacks/scenarios/s1_direct_injection.yaml`. Varian override memakai penanda `S1-OVERRIDE-vXX`. Semua varian S1 dinilai lewat `variant.marker` (case-insensitive) |
 
 ## Belum diputuskan
 
 | Hal | Pemilik keputusan | Catatan |
 |---|---|---|
-| String canary S1 dan cara mencatatnya | A | Isi blok `TODO(S1)` di system prompt, catat nilainya di tabel ini |
 | Jumlah percobaan per kombinasi | Tim | Minimal 10 menurut Bagian 8; angka final disepakati di Fase 3 |
 | Pemilik `attacks/judges.py` | Tim | Belum ada di tabel Bagian 3; usulan: setiap pemilik skenario menulis aturannya, C merapikan |
 | Signature fungsi `apply()` di modul mitigasi | A untuk M1, B untuk M2, C untuk M3 | Stub Fase 0 memakai `*args, **kwargs` agar tidak mengunci kontrak yang belum disepakati |

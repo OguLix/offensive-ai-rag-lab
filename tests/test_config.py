@@ -28,8 +28,9 @@ def test_default_collection_is_whitelisted_and_server_is_loopback() -> None:
     assert settings.max_question_chars > 0
 
 
-def test_system_prompt_still_has_canary_todo() -> None:
+def test_system_prompt_contains_s1_canary_without_todo() -> None:
     prompt = load_system_prompt()
 
     assert prompt.strip()
-    assert "TODO(S1" in prompt
+    assert "TODO(S1" not in prompt
+    assert "S1-CANARY-RAGREDTEAM-7492" in prompt
