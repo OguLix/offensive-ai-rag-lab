@@ -32,13 +32,13 @@ Perubahan di sana lewat PR dengan dua peninjau.
 | Repo private; payload hanya di `attacks/` | Bagian 2 |
 | Agent AI tidak menjalankan perintah git yang mengubah repo | Bagian 12.1; commit dilakukan manusia |
 | Kontrak dataclass di `types.py` dibekukan seperti Bagian 6 | Tiga orang bekerja paralel; perubahan butuh persetujuan ketiganya |
+| Model chat `llama3.2:3b`, embedding `nomic-embed-text` (keduanya via Ollama) | Disepakati tim; diterapkan ke `config/settings.yaml` di branch `feature/a-vectorstore`. Kuantisasi dicatat C di `docs/lab-environment.md` |
+| Organisasi fiktif: Unit Layanan Administrasi **RAG REDTeam** | Korpus bersih `data/corpus/` (14 dokumen) memuat versi benar dari topik yang diserang S2/S3 (jam layanan, biaya administrasi, prosedur pengambilan dokumen, kontak, pendaftaran) dan diuji di `tests/test_corpus.py` agar tidak memuat marker atau klaim palsu |
 
 ## Belum diputuskan
 
 | Hal | Pemilik keputusan | Catatan |
 |---|---|---|
-| Nama model chat dan embedding beserta kuantisasinya | Tim | Isi `chat_model`/`embedding_model`, catat di `docs/lab-environment.md` |
-| Skenario bisnis fiktif untuk korpus | A (korpus) + tim | Ganti `TODO_NAMA_FIKTIF` di `config/prompts/system_prompt.txt`; tanpa data nyata |
 | String canary S1 dan cara mencatatnya | A | Isi blok `TODO(S1)` di system prompt, catat nilainya di tabel ini |
 | Jumlah percobaan per kombinasi | Tim | Minimal 10 menurut Bagian 8; angka final disepakati di Fase 3 |
 | Pemilik `attacks/judges.py` | Tim | Belum ada di tabel Bagian 3; usulan: setiap pemilik skenario menulis aturannya, C merapikan |
