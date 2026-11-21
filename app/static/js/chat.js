@@ -342,7 +342,7 @@ function buildPastTurnNode(turn) {
 
   const label = document.createElement("p");
   label.className = "assistant-label";
-  label.textContent = "RAG REDTeam";
+  label.textContent = "RAGTrap";
   assistantGroup.append(label);
 
   if (turn.answerView.meta) {
