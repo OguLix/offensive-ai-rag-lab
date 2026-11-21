@@ -13,8 +13,11 @@ REQUIRED_HOOKS = (
     'id="send"',
     'id="history-list"',
     'id="disable-mitigations"',
+    'id="reset-chat"',
     'id="collections"',
+    'id="mitigation-menu"',
     'id="mitigation-panel"',
+    'id="mitigation-groups"',
     'id="answer-panel"',
     'id="answer-meta"',
     'id="answer-title"',
@@ -24,6 +27,7 @@ REQUIRED_HOOKS = (
     'id="answer-action"',
     'id="chunks"',
     'id="messages"',
+    'id="copy-prompt"',
     'id="chunk-count"',
     'id="model-name"',
 )
@@ -50,3 +54,13 @@ def test_page_has_no_external_asset_references(client: FlaskClient) -> None:
     assert "http://" not in html
     assert "https://" not in html
     assert "cdn." not in html
+
+
+def test_page_has_accessible_document_structure_and_zone_markers(client: FlaskClient) -> None:
+    html = client.get("/").get_data(as_text=True)
+
+    assert '<html lang="id">' in html
+    assert html.count("<h1") == 1
+    assert "—" not in html  # antislop R-02: no em dash in UI copy
+    for marker in ("[1]", "[2]", "[3]", "[4]"):
+        assert marker in html
