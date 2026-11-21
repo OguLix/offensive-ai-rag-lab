@@ -9,15 +9,18 @@ from flask.testing import FlaskClient
 
 REQUIRED_HOOKS = (
     'id="chat-form"',
+    'id="dock-toggle"',
     'id="question"',
     'id="send"',
     'id="history-list"',
     'id="disable-mitigations"',
     'id="reset-chat"',
-    'id="collections"',
+    'id="attack-menu"',
+    'id="attack-panel"',
     'id="mitigation-menu"',
     'id="mitigation-panel"',
-    'id="mitigation-groups"',
+    'id="method-menu"',
+    'id="collections"',
     'id="answer-panel"',
     'id="answer-meta"',
     'id="answer-title"',
@@ -27,7 +30,6 @@ REQUIRED_HOOKS = (
     'id="answer-action"',
     'id="chunks"',
     'id="messages"',
-    'id="copy-prompt"',
     'id="chunk-count"',
     'id="model-name"',
 )
@@ -56,11 +58,13 @@ def test_page_has_no_external_asset_references(client: FlaskClient) -> None:
     assert "cdn." not in html
 
 
-def test_page_has_accessible_document_structure_and_zone_markers(client: FlaskClient) -> None:
+def test_page_has_clean_headings_without_bracket_markers(client: FlaskClient) -> None:
     html = client.get("/").get_data(as_text=True)
 
     assert '<html lang="id">' in html
     assert html.count("<h1") == 1
-    assert "—" not in html  # antislop R-02: no em dash in UI copy
+    assert "—" not in html
+    assert "RAG REDTeam" in html
+    assert "ANGGA AI" not in html
     for marker in ("[1]", "[2]", "[3]", "[4]"):
-        assert marker in html
+        assert marker not in html
