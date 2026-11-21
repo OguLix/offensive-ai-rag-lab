@@ -19,8 +19,7 @@ Komponen dan arah koneksinya:
 - ChromaDB dan Ollama tidak diekspos ke jaringan; hanya diakses dari proses
   Flask di host yang sama.
 
-Gambar topologi: `docs/topology.drawio` (sumber), ekspor ke `docs/topology.png`
-dilakukan manual di draw.io (TODO: ekspor dan commit `docs/topology.png`).
+Gambar topologi: `docs/topology.drawio` (sumber) dan `docs/topology.png` (ekspor).
 
 ## 2. Target
 
@@ -57,7 +56,21 @@ dilakukan manual di draw.io (TODO: ekspor dan commit `docs/topology.png`).
 
 ## 5. Catatan waktu
 
-TODO: diisi setelah pilot run. Catat latensi satu permintaan (rata-rata dan p95)
-dari `latency_s` di CSV, lalu hitung total waktu satu run penuh
-(skenario x varian x trial x kondisi) dan bandingkan dengan estimasi
-`--dry-run`. Angka ini dipakai untuk anggaran waktu di laporan.
+Diukur dari run final (tag `final`, 10 trial per kombinasi, 440 run) pada
+mesin di Bagian 3. Latensi per permintaan dari kolom `latency_s` di
+`evaluation/results/run-final.csv`:
+
+| Kondisi | Latensi rata-rata | p95 | Catatan |
+|---|---|---|---|
+| S1 baseline | 5.18 s | 12.96 s | Generasi penuh (retrieval + LLM) |
+| S1 M1 | ~0 s | — | Diblokir oleh input filter sebelum LLM |
+| S2 baseline | 0.91 s | 1.17 s | |
+| S2 M2 | 1.93 s | 3.95 s | Sanitasi konteks menambah latensi |
+| S3 baseline | 0.90 s | 1.15 s | |
+| S3 M3 (provenance/sanitizer) | 2.15 s | 4.65 s | |
+| Normal | 1.8–3.1 s | 3.99–6.81 s | Tergantung kondisi |
+
+Total waktu run final: sekitar 17 menit untuk 440 run (rata-rata 5.42 s/run pada
+pilot, 0.9–5.2 s/run pada run final tergantung kondisi). Angka ini dipakai
+untuk anggaran waktu di laporan. Estimasi `--dry-run` (10 s/run) konservatif;
+latensi aktual lebih rendah.
