@@ -342,7 +342,7 @@ function buildPastTurnNode(turn) {
 
   const label = document.createElement("p");
   label.className = "assistant-label";
-  label.textContent = "ANGGA AI";
+  label.textContent = "RAG REDTeam";
   assistantGroup.append(label);
 
   if (turn.answerView.meta) {
@@ -505,12 +505,41 @@ function renderChunks(chunks) {
 }
 
 function renderPrompt(messages) {
+  const list = Array.isArray(messages) ? messages : [];
   const formatted = JSON.stringify(messages ?? null, null, 2);
   state.lastPromptJson = formatted;
   els.messages.classList.remove("empty");
-  els.messages.textContent = formatted;
+  els.messages.replaceChildren();
+
+  if (list.length === 0) {
+    els.messages.textContent = formatted;
+  } else {
+    for (const msg of list) {
+      const card = document.createElement("article");
+      card.className = "prompt-msg";
+
+      const role = String(msg && msg.role ? msg.role : "unknown").toLowerCase();
+      card.dataset.role = role;
+
+      const head = document.createElement("div");
+      head.className = "prompt-msg-head";
+
+      const badge = document.createElement("span");
+      badge.className = "prompt-role-badge";
+      badge.textContent = role.toUpperCase();
+      head.append(badge);
+
+      const body = document.createElement("p");
+      body.className = "prompt-msg-body";
+      body.textContent = String(msg && msg.content !== undefined ? msg.content : "");
+
+      card.append(head, body);
+      els.messages.append(card);
+    }
+  }
+
   els.copyPrompt.disabled = false;
-  els.copyPrompt.textContent = "Salin";
+  els.copyPrompt.textContent = "Salin JSON";
 }
 
 function clearEvidence() {
@@ -519,7 +548,7 @@ function clearEvidence() {
   els.messages.classList.add("empty");
   els.messages.textContent = "Belum ada prompt.";
   els.copyPrompt.disabled = true;
-  els.copyPrompt.textContent = "Salin";
+  els.copyPrompt.textContent = "Salin JSON";
 }
 
 function selectedCollection() {
@@ -813,7 +842,7 @@ els.copyPrompt.addEventListener("click", async () => {
   }
   window.setTimeout(() => {
     if (!els.copyPrompt.disabled) {
-      els.copyPrompt.textContent = "Salin";
+      els.copyPrompt.textContent = "Salin JSON";
     }
   }, 1600);
 });

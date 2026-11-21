@@ -1021,17 +1021,62 @@ input:focus-visible {
   flex: 1;
   min-height: 0;
   margin: 0;
+  padding: 2px 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.messages.empty {
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--paper);
-  color: var(--ink);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.prompt-msg {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+  flex: none;
+}
+
+.prompt-msg-head {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.prompt-role-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--slate);
+  color: #ffffff;
   font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.prompt-msg[data-role="user"] .prompt-role-badge {
+  background: var(--ink);
+}
+
+.prompt-msg-body {
+  margin: 0;
+  padding: 12px;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.55;
   white-space: pre-wrap;
   word-break: break-word;
-  overflow: auto;
 }
 
 .empty {

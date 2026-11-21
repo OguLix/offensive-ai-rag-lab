@@ -76,7 +76,7 @@
     </article>
 
     <div id="active-assistant-group" class="assistant-group">
-      <p class="assistant-label">ANGGA AI</p>
+      <p class="assistant-label">RAG REDTeam</p>
       {% include "partials/answer_panel.html" %}
     </div>
   </div>
@@ -181,7 +181,7 @@
           name="question"
           type="text"
           autocomplete="off"
-          placeholder="Tulis pertanyaan untuk Angga AI..."
+          placeholder="Tulis pertanyaan untuk RAG REDTeam..."
           required
         >
       </div>
@@ -230,12 +230,12 @@
 
   <div id="prompt-view" class="prompt-view" role="tabpanel" aria-labelledby="tab-prompt" hidden>
     <div class="prompt-toolbar">
-      <span class="prompt-caption">Messages JSON</span>
+      <span class="prompt-caption">Daftar pesan ke LLM</span>
       <button id="copy-prompt" class="copy-btn" type="button" disabled>
-        Salin
+        Salin JSON
       </button>
     </div>
-    <pre id="messages" class="messages empty">Belum ada prompt.</pre>
+    <div id="messages" class="messages empty">Belum ada prompt.</div>
   </div>
 </aside>
 {% endblock %}

@@ -64,5 +64,7 @@ def test_page_has_clean_headings_without_bracket_markers(client: FlaskClient) ->
     assert '<html lang="id">' in html
     assert html.count("<h1") == 1
     assert "—" not in html
+    assert "RAG REDTeam" in html
+    assert "ANGGA AI" not in html
     for marker in ("[1]", "[2]", "[3]", "[4]"):
         assert marker not in html
