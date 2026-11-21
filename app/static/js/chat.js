@@ -2,7 +2,7 @@
 
 const EMPTY_ANSWER = {
   title: "Belum ada jawaban",
-  body: "Atur koleksi dan mitigasi di bagian [3], tulis pertanyaan, lalu pilih Kirim ke chatbot.",
+  body: "Klik tombol + di sebelah kiri kotak pesan untuk mengatur serangan, mitigasi, atau koleksi, lalu kirim pertanyaan.",
 };
 
 const LOADING_ANSWER = {
@@ -55,10 +55,16 @@ const MITIGATION_GROUPS = [
 const state = {
   options: null,
   busy: false,
-  history: [],
+  sessions: [],
+  activeSessionId: null,
+  nextSessionNum: 1,
   lastQuestion: "",
   lastPromptJson: "",
   activeTab: "chunks",
+  dockOpen: false,
+  activeFlyout: "collections",
+  currentAnswerState: "empty",
+  currentAnswerView: EMPTY_ANSWER,
 };
 
 const els = {
@@ -69,10 +75,9 @@ const els = {
   disableMitigations: document.getElementById("disable-mitigations"),
   resetChat: document.getElementById("reset-chat"),
   conversationHeading: document.getElementById("conversation-heading"),
-  conversationTitleText: document.getElementById("conversation-title-text"),
-  runSummary: document.getElementById("run-summary"),
-  assistantLabel: document.querySelector(".assistant-label"),
+  assistantLabel: document.querySelector("#active-assistant-group .assistant-label"),
   thread: document.getElementById("thread"),
+  pastTurns: document.getElementById("past-turns"),
   questionBubble: document.getElementById("question-bubble"),
   questionText: document.getElementById("question-text"),
   answerPanel: document.getElementById("answer-panel"),
@@ -83,15 +88,17 @@ const els = {
   answerStatus: document.getElementById("answer-status"),
   answerProgress: document.getElementById("answer-progress"),
   answerAction: document.getElementById("answer-action"),
+  dockToggle: document.getElementById("dock-toggle"),
+  chatControls: document.getElementById("chat-controls"),
+  attackMenu: document.getElementById("attack-menu"),
+  attackPanel: document.getElementById("attack-panel"),
   mitigationMenu: document.getElementById("mitigation-menu"),
-  mitigationCount: document.getElementById("mitigation-count"),
   mitigationPanel: document.getElementById("mitigation-panel"),
   mitigationGroups: document.getElementById("mitigation-groups"),
-  closeMitigationPanel: document.getElementById("close-mitigation-panel"),
+  methodMenu: document.getElementById("method-menu"),
   collections: document.getElementById("collections"),
   form: document.getElementById("chat-form"),
   question: document.getElementById("question"),
-  charCounter: document.getElementById("char-counter"),
   send: document.getElementById("send"),
   tabChunks: document.getElementById("tab-chunks"),
   tabPrompt: document.getElementById("tab-prompt"),
@@ -101,11 +108,15 @@ const els = {
   copyPrompt: document.getElementById("copy-prompt"),
   chunkCount: document.getElementById("chunk-count"),
   mobileNavButtons: document.querySelectorAll(".mobile-nav-btn"),
-  panels: document.querySelectorAll(".panel[data-panel]"),
+  panels: document.querySelectorAll("[data-panel]"),
+  presetButtons: document.querySelectorAll(".preset-btn"),
 };
 
 function setAnswer(name, content) {
   const view = content || {};
+  state.currentAnswerState = name;
+  state.currentAnswerView = view;
+
   els.answerPanel.dataset.state = name;
   els.answerPanel.setAttribute("aria-busy", name === "loading" ? "true" : "false");
 
@@ -136,32 +147,45 @@ function setAnswer(name, content) {
 function setBusy(busy) {
   state.busy = busy;
   els.send.disabled = busy || !state.options;
-  els.send.textContent = busy ? "Menunggu jawaban" : "Kirim ke chatbot";
   els.form.setAttribute("aria-busy", busy ? "true" : "false");
 }
 
-function updateCharCounter() {
-  const limit = state.options ? state.options.max_question_chars : 2000;
-  els.charCounter.textContent = els.question.value.length + " / " + limit;
+function setDockOpen(open) {
+  state.dockOpen = Boolean(open);
+  els.dockToggle.setAttribute("aria-expanded", String(state.dockOpen));
+  els.chatControls.hidden = !state.dockOpen;
+  if (state.dockOpen && !state.activeFlyout) {
+    setFlyout("collections");
+  }
+}
+
+function setFlyout(target) {
+  state.activeFlyout = target;
+
+  const map = [
+    { key: "attack", button: els.attackMenu, panel: els.attackPanel },
+    { key: "mitigations", button: els.mitigationMenu, panel: els.mitigationPanel },
+    { key: "collections", button: els.methodMenu, panel: els.collections },
+  ];
+
+  for (const item of map) {
+    const open = item.key === target;
+    item.button.setAttribute("aria-expanded", String(open));
+    item.button.classList.toggle("is-active", open);
+    item.panel.hidden = !open;
+  }
 }
 
 function updateConditionSummary() {
-  const collection = state.options ? selectedCollection() : "memuat...";
+  const collection = state.options ? selectedCollection() : "kb_clean";
   els.summaryCollection.textContent = collection;
-  els.summaryCollection.classList.toggle("is-warning", collection === "kb_poisoned");
+  els.summaryCollection.classList.toggle("is-poisoned", collection === "kb_poisoned");
 
   const boxes = els.mitigationPanel.querySelectorAll('input[type="checkbox"]');
   const activeCount = Array.from(boxes).filter((box) => box.checked).length;
 
-  els.summaryMitigations.textContent = activeCount + " aktif";
-  els.mitigationCount.textContent = activeCount + " aktif";
-  els.mitigationCount.classList.toggle("has-active", activeCount > 0);
+  els.summaryMitigations.textContent = activeCount + " mitigasi";
   els.disableMitigations.disabled = activeCount === 0;
-}
-
-function setMitigationPanelOpen(open) {
-  els.mitigationMenu.setAttribute("aria-expanded", String(open));
-  els.mitigationPanel.hidden = !open;
 }
 
 function renderCollections(data) {
@@ -170,9 +194,6 @@ function renderCollections(data) {
   for (const name of data.collections) {
     const label = document.createElement("label");
     label.className = "collection-option";
-    if (name === "kb_poisoned") {
-      label.classList.add("is-poisoned");
-    }
 
     const input = document.createElement("input");
     input.type = "radio";
@@ -221,11 +242,6 @@ function renderMitigations(flags) {
     const extra = document.createElement("div");
     extra.className = "mitigation-group";
 
-    const heading = document.createElement("p");
-    heading.className = "mitigation-group-label";
-    heading.textContent = "Mitigasi lainnya";
-    extra.append(heading);
-
     for (const flag of remaining) {
       extra.append(createMitigationOption(flag));
     }
@@ -249,39 +265,61 @@ function createMitigationOption(flag) {
   return label;
 }
 
+function activeSession() {
+  return state.sessions.find((s) => s.id === state.activeSessionId) || null;
+}
+
+function ensureActiveSession(firstQuestion) {
+  let session = activeSession();
+  if (!session) {
+    const title =
+      firstQuestion.length > 42 ? firstQuestion.slice(0, 42) + "..." : firstQuestion;
+    session = {
+      id: "sesi-" + state.nextSessionNum++,
+      title: title,
+      turns: [],
+      chunks: [],
+      messages: null,
+    };
+    state.sessions.unshift(session);
+    state.activeSessionId = session.id;
+  }
+  return session;
+}
+
 function renderHistory() {
   els.historyList.replaceChildren();
 
-  if (state.history.length === 0) {
+  if (state.sessions.length === 0) {
     const empty = document.createElement("li");
     empty.className = "history-empty";
-    empty.textContent =
-      "Belum ada riwayat. Kirim pertanyaan pertama untuk menyimpannya di sesi ini.";
+    empty.textContent = "Belum ada sesi percakapan.";
     els.historyList.append(empty);
     return;
   }
 
-  for (const entry of state.history.slice(0, 20)) {
+  for (const session of state.sessions.slice(0, 25)) {
     const item = document.createElement("li");
     item.className = "history-item";
+    if (session.id === state.activeSessionId) {
+      item.classList.add("is-active");
+    }
 
     const button = document.createElement("button");
     button.type = "button";
 
-    const questionLine = document.createElement("span");
-    questionLine.className = "history-question";
-    questionLine.textContent = entry.question;
+    const titleSpan = document.createElement("span");
+    titleSpan.className = "session-title";
+    titleSpan.textContent = session.title;
 
-    const metaLine = document.createElement("span");
-    metaLine.className = "history-meta";
-    metaLine.textContent = entry.collection + " · " + entry.activeMitigations + " mitigasi";
+    const countSpan = document.createElement("span");
+    countSpan.className = "session-count";
+    countSpan.textContent = String(session.turns.length);
 
-    button.append(questionLine, metaLine);
+    button.append(titleSpan, countSpan);
     button.addEventListener("click", () => {
-      els.question.value = entry.question;
-      updateCharCounter();
+      loadSession(session.id);
       setMobilePanel("conversation");
-      els.question.focus();
     });
 
     item.append(button);
@@ -289,10 +327,117 @@ function renderHistory() {
   }
 }
 
-function addHistory(question, collection, flags) {
-  const activeMitigations = Object.values(flags).filter(Boolean).length;
-  state.history.unshift({ question, collection, activeMitigations });
+function buildPastTurnNode(turn) {
+  const pair = document.createElement("div");
+  pair.className = "turn-pair";
+
+  const userArticle = document.createElement("article");
+  userArticle.className = "bubble-user";
+  const userP = document.createElement("p");
+  userP.textContent = turn.question;
+  userArticle.append(userP);
+
+  const assistantGroup = document.createElement("div");
+  assistantGroup.className = "assistant-group";
+
+  const label = document.createElement("p");
+  label.className = "assistant-label";
+  label.textContent = "ANGGA AI";
+  assistantGroup.append(label);
+
+  if (turn.answerView.meta) {
+    const meta = document.createElement("p");
+    meta.className = "answer-meta";
+    meta.textContent = turn.answerView.meta;
+    assistantGroup.append(meta);
+  }
+
+  const card = document.createElement("div");
+  card.className = "answer-card";
+  if (turn.answerState === "error") {
+    card.classList.add("is-error");
+  } else if (turn.answerState === "blocked") {
+    card.classList.add("is-blocked");
+  }
+
+  if (turn.answerView.title) {
+    const title = document.createElement("h3");
+    title.className = "answer-title";
+    title.textContent = turn.answerView.title;
+    card.append(title);
+  }
+
+  if (turn.answerView.status) {
+    const status = document.createElement("p");
+    status.className = "answer-status";
+    status.textContent = turn.answerView.status;
+    card.append(status);
+  }
+
+  if (turn.answerView.body) {
+    const body = document.createElement("p");
+    body.className = "answer-body";
+    body.textContent = turn.answerView.body;
+    card.append(body);
+  }
+
+  assistantGroup.append(card);
+  pair.append(userArticle, assistantGroup);
+  return pair;
+}
+
+function renderSessionThread(session) {
+  els.pastTurns.replaceChildren();
+
+  if (!session || session.turns.length === 0) {
+    els.pastTurns.hidden = true;
+    els.questionBubble.hidden = true;
+    els.questionText.textContent = "";
+    els.conversationHeading.textContent = "Percakapan baru";
+    setAnswer("empty", EMPTY_ANSWER);
+    clearEvidence();
+    return;
+  }
+
+  els.conversationHeading.textContent = session.title;
+  const previousTurns = session.turns.slice(0, -1);
+  const latestTurn = session.turns[session.turns.length - 1];
+
+  if (previousTurns.length > 0) {
+    for (const turn of previousTurns) {
+      els.pastTurns.append(buildPastTurnNode(turn));
+    }
+    els.pastTurns.hidden = false;
+  } else {
+    els.pastTurns.hidden = true;
+  }
+
+  state.lastQuestion = latestTurn.question;
+  els.questionBubble.hidden = false;
+  els.questionText.textContent = latestTurn.question;
+  setAnswer(latestTurn.answerState, latestTurn.answerView);
+
+  renderChunks(session.chunks);
+  if (session.messages) {
+    renderPrompt(session.messages);
+  } else {
+    els.messages.classList.add("empty");
+    els.messages.textContent = "Belum ada prompt.";
+    els.copyPrompt.disabled = true;
+  }
+}
+
+function loadSession(sessionId) {
+  if (state.busy) {
+    return;
+  }
+  const session = state.sessions.find((s) => s.id === sessionId);
+  if (!session) {
+    return;
+  }
+  state.activeSessionId = session.id;
   renderHistory();
+  renderSessionThread(session);
 }
 
 function setMobilePanel(target) {
@@ -323,13 +468,12 @@ function setTab(tab) {
 function renderChunks(chunks) {
   const list = Array.isArray(chunks) ? chunks : [];
   els.chunks.replaceChildren();
-  els.chunkCount.textContent = "[" + list.length + "]";
+  els.chunkCount.textContent = String(list.length);
 
   if (list.length === 0) {
     const empty = document.createElement("li");
     empty.className = "empty";
-    empty.textContent =
-      "Belum ada chunk. Kirim pertanyaan untuk melihat dokumen yang diambil retriever.";
+    empty.textContent = "Belum ada chunk yang diambil.";
     els.chunks.append(empty);
     return;
   }
@@ -343,42 +487,19 @@ function renderChunks(chunks) {
 
     const source = document.createElement("span");
     source.className = "chunk-source";
-    source.textContent = chunk.source || chunk.doc_id || "(sumber tidak diketahui)";
-
-    const numericScore = Number(chunk.score);
-    const clampedScore = Number.isFinite(numericScore)
-      ? Math.max(0, Math.min(1, numericScore))
-      : 0;
+    source.textContent = chunk.source;
 
     const score = document.createElement("span");
     score.className = "chunk-score";
-    score.textContent = "skor " + (Number.isFinite(numericScore) ? numericScore.toFixed(2) : "0.00");
+    score.textContent = "skor " + Number(chunk.score).toFixed(2);
 
     head.append(source, score);
-
-    const tags = document.createElement("div");
-    tags.className = "chunk-tags";
-
-    const bar = document.createElement("div");
-    bar.className = "chunk-bar";
-    const fill = document.createElement("span");
-    fill.className = "chunk-bar-fill";
-    fill.style.width = Math.round(clampedScore * 100) + "%";
-    bar.append(fill);
-    tags.append(bar);
-
-    if (String(chunk.source || "").includes("poisoned")) {
-      const flag = document.createElement("span");
-      flag.className = "chunk-flag";
-      flag.textContent = "poisoned";
-      tags.append(flag);
-    }
 
     const text = document.createElement("p");
     text.className = "chunk-text";
     text.textContent = chunk.text;
 
-    item.append(head, tags, text);
+    item.append(head, text);
     els.chunks.append(item);
   }
 }
@@ -389,22 +510,29 @@ function renderPrompt(messages) {
   els.messages.classList.remove("empty");
   els.messages.textContent = formatted;
   els.copyPrompt.disabled = false;
-  els.copyPrompt.textContent = "Salin JSON";
+  els.copyPrompt.textContent = "Salin";
 }
 
 function clearEvidence() {
   renderChunks([]);
   state.lastPromptJson = "";
   els.messages.classList.add("empty");
-  els.messages.textContent =
-    "Belum ada prompt. Kirim pertanyaan untuk memeriksa prompt akhir.";
+  els.messages.textContent = "Belum ada prompt.";
   els.copyPrompt.disabled = true;
-  els.copyPrompt.textContent = "Salin JSON";
+  els.copyPrompt.textContent = "Salin";
 }
 
 function selectedCollection() {
   const checked = els.collections.querySelector('input[name="collection"]:checked');
   return checked ? checked.value : state.options.default_collection;
+}
+
+function selectCollectionByName(name) {
+  const radio = els.collections.querySelector(`input[name="collection"][value="${name}"]`);
+  if (radio) {
+    radio.checked = true;
+    updateConditionSummary();
+  }
 }
 
 function selectedFlags() {
@@ -415,32 +543,50 @@ function selectedFlags() {
   return flags;
 }
 
-function showQuestion(question) {
+function showQuestion(question, session) {
   els.questionBubble.hidden = false;
   els.questionText.textContent = question;
-  els.conversationTitleText.textContent =
-    question.length > 60 ? question.slice(0, 60) + "..." : question;
+  els.conversationHeading.textContent = session ? session.title : question;
 }
 
-function resetConversation() {
+function startNewSession() {
   if (state.busy) {
     return;
   }
+  state.activeSessionId = null;
   state.lastQuestion = "";
+  els.pastTurns.replaceChildren();
+  els.pastTurns.hidden = true;
   els.questionBubble.hidden = true;
   els.questionText.textContent = "";
-  els.conversationTitleText.textContent = "Percakapan baru";
-  els.runSummary.hidden = true;
-  els.runSummary.textContent = "";
+  els.conversationHeading.textContent = "Percakapan baru";
   setAnswer("empty", EMPTY_ANSWER);
   clearEvidence();
+  renderHistory();
   els.question.value = "";
-  updateCharCounter();
+  setDockOpen(false);
   setMobilePanel("conversation");
   els.question.focus();
 }
 
-function showError(status, message) {
+function recordSessionTurn(session, question, chunks, messages) {
+  if (!session) {
+    return;
+  }
+  const snapshotView = Object.assign({}, state.currentAnswerView);
+  if (state.currentAnswerTurnIndex !== undefined && session.turns[state.currentAnswerTurnIndex]) {
+    session.turns[state.currentAnswerTurnIndex] = {
+      question: question,
+      answerState: state.currentAnswerState,
+      answerView: snapshotView,
+    };
+  }
+  session.chunks = Array.isArray(chunks) ? chunks : [];
+  session.messages = messages || null;
+  renderHistory();
+}
+
+function showError(status, message, session, question) {
   const copy = ERROR_COPY[status] || {
     meta: "Error: server tidak dapat dihubungi",
     title: "Server tidak dapat dihubungi",
@@ -456,6 +602,8 @@ function showError(status, message) {
     body: body,
     action: { label: "Kirim ulang", disabled: false },
   });
+
+  recordSessionTurn(session, question, [], null);
 }
 
 function revealAnswer() {
@@ -468,18 +616,12 @@ function revealAnswer() {
   els.thread.scrollTop += labelTop - threadTop - 16;
 }
 
-function showResult(question, data, collection, flags) {
-  const activeCount = Object.values(flags).filter(Boolean).length;
-  const latencyText = Number(data.latency_s).toFixed(2) + " detik";
-
-  els.runSummary.hidden = false;
-  els.runSummary.textContent = collection + " · " + latencyText;
-
+function showResult(question, data, collection, session) {
   if (data.blocked_by) {
     const meta = [
       collection,
       data.blocked_by + " aktif",
-      latencyText,
+      Number(data.latency_s).toFixed(2) + " detik",
     ].join(" \u00b7 ");
 
     setAnswer("blocked", {
@@ -488,20 +630,12 @@ function showResult(question, data, collection, flags) {
       body: "Mitigasi menghentikan permintaan ini. Tidak ada jawaban yang ditampilkan.",
     });
   } else {
-    const meta = [
-      collection,
-      activeCount + " mitigasi aktif",
-      latencyText,
-    ].join(" \u00b7 ");
-
-    setAnswer("success", {
-      meta: meta,
-      body: data.response || "(jawaban kosong)",
-    });
+    setAnswer("success", { body: data.response || "(jawaban kosong)" });
   }
 
   renderChunks(data.chunks);
   renderPrompt(data.messages);
+  recordSessionTurn(session, question, data.chunks, data.messages);
 
   revealAnswer();
 }
@@ -515,25 +649,37 @@ async function submitQuestion(rawQuestion, options) {
     return;
   }
 
-  const collection = selectedCollection();
-  const flags = selectedFlags();
-
-  setMitigationPanelOpen(false);
-  state.lastQuestion = question;
-  setBusy(true);
-  showQuestion(question);
-  els.runSummary.hidden = true;
-  setAnswer("loading", LOADING_ANSWER);
-  clearEvidence();
+  setDockOpen(false);
+  const session = ensureActiveSession(question);
 
   if (!settings.retry) {
-    addHistory(question, collection, flags);
+    if (session.turns.length > 0) {
+      const completedTurn = session.turns[session.turns.length - 1];
+      els.pastTurns.append(buildPastTurnNode(completedTurn));
+      els.pastTurns.hidden = false;
+    }
+    session.turns.push({
+      question: question,
+      answerState: "loading",
+      answerView: LOADING_ANSWER,
+    });
+    state.currentAnswerTurnIndex = session.turns.length - 1;
+    els.question.value = "";
+  } else {
+    state.currentAnswerTurnIndex = Math.max(0, session.turns.length - 1);
   }
+
+  state.lastQuestion = question;
+  setBusy(true);
+  showQuestion(question, session);
+  setAnswer("loading", LOADING_ANSWER);
+  clearEvidence();
+  renderHistory();
 
   const payload = {
     question: question,
-    collection: collection,
-    flags: flags,
+    collection: selectedCollection(),
+    flags: selectedFlags(),
   };
 
   try {
@@ -545,13 +691,13 @@ async function submitQuestion(rawQuestion, options) {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      showError(response.status, data.error);
+      showError(response.status, data.error, session, question);
       return;
     }
 
-    showResult(question, data, payload.collection, payload.flags);
+    showResult(question, data, payload.collection, session);
   } catch (error) {
-    showError(0, error.message);
+    showError(0, error.message, session, question);
   } finally {
     setBusy(false);
   }
@@ -570,13 +716,12 @@ async function loadOptions() {
     els.question.maxLength = data.max_question_chars;
     renderCollections(data);
     renderMitigations(data.mitigations);
-    updateCharCounter();
     updateConditionSummary();
     els.send.disabled = false;
     setAnswer("empty", EMPTY_ANSWER);
     els.question.focus();
   } catch (error) {
-    showError(0, error.message);
+    showError(0, error.message, null, "");
   }
 }
 
@@ -585,38 +730,49 @@ els.form.addEventListener("submit", (event) => {
   submitQuestion(els.question.value);
 });
 
-els.question.addEventListener("input", updateCharCounter);
-
 els.answerAction.addEventListener("click", () => {
   if (state.lastQuestion) {
     submitQuestion(state.lastQuestion, { retry: true });
   }
 });
 
-els.mitigationMenu.addEventListener("click", () => {
-  const expanded = els.mitigationMenu.getAttribute("aria-expanded") === "true";
-  setMitigationPanelOpen(!expanded);
+els.dockToggle.addEventListener("click", () => {
+  setDockOpen(!state.dockOpen);
 });
 
-els.closeMitigationPanel.addEventListener("click", () => {
-  setMitigationPanelOpen(false);
-  els.mitigationMenu.focus();
+els.attackMenu.addEventListener("click", () => setFlyout("attack"));
+els.mitigationMenu.addEventListener("click", () => setFlyout("mitigations"));
+els.methodMenu.addEventListener("click", () => setFlyout("collections"));
+
+els.presetButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const targetCollection = button.dataset.presetCollection;
+    const presetQuestion = button.dataset.presetQuestion;
+    if (targetCollection) {
+      selectCollectionByName(targetCollection);
+    }
+    if (presetQuestion) {
+      els.question.value = presetQuestion;
+    }
+    setDockOpen(false);
+    els.question.focus();
+  });
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !els.mitigationPanel.hidden) {
-    setMitigationPanelOpen(false);
-    els.mitigationMenu.focus();
+  if (event.key === "Escape" && state.dockOpen) {
+    setDockOpen(false);
+    els.dockToggle.focus();
   }
 });
 
 document.addEventListener("click", (event) => {
   if (
-    !els.mitigationPanel.hidden &&
-    !els.mitigationPanel.contains(event.target) &&
-    !els.mitigationMenu.contains(event.target)
+    state.dockOpen &&
+    !els.chatControls.contains(event.target) &&
+    !els.dockToggle.contains(event.target)
   ) {
-    setMitigationPanelOpen(false);
+    setDockOpen(false);
   }
 });
 
@@ -627,7 +783,7 @@ els.disableMitigations.addEventListener("click", () => {
   updateConditionSummary();
 });
 
-els.resetChat.addEventListener("click", resetConversation);
+els.resetChat.addEventListener("click", startNewSession);
 
 els.tabChunks.addEventListener("click", () => setTab("chunks"));
 els.tabPrompt.addEventListener("click", () => setTab("prompt"));
@@ -651,17 +807,15 @@ els.copyPrompt.addEventListener("click", async () => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText(state.lastPromptJson);
       els.copyPrompt.textContent = "Tersalin";
-    } else {
-      els.copyPrompt.textContent = "Clipboard tidak tersedia";
     }
   } catch {
-    els.copyPrompt.textContent = "Gagal menyalin";
+    els.copyPrompt.textContent = "Gagal";
   }
   window.setTimeout(() => {
     if (!els.copyPrompt.disabled) {
-      els.copyPrompt.textContent = "Salin JSON";
+      els.copyPrompt.textContent = "Salin";
     }
-  }, 1800);
+  }, 1600);
 });
 
 els.mobileNavButtons.forEach((button) => {
@@ -672,5 +826,4 @@ els.mobileNavButtons.forEach((button) => {
 
 setTab("chunks");
 renderHistory();
-updateCharCounter();
 loadOptions();
